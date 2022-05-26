@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=yes"
+    />
+    <title>Three.js</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        position: relative;
+      }
+      #c {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+
+      .select {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <div class="select">
+        <select id="selectbox">
+          <option value="models/cube.obj">Cube</option>
+          <option value="models/minicooper.obj">Minicooper</option>
+          <option value="models/shuttle.obj">Shuttle</option>
+          <option value="models/dolphin.obj">Dolphin</option>
+          <option value="models/magnolia.obj" selected>Magnolia</option>
+          <option value="models/monkey.obj">Monkey</option>
+        </select>
+        <span class="focus"></span>
+      </div>
+      <canvas id="c"></canvas>
+      <div
+        style="
+          position: fixed;
+          top: 0px;
+          left: 0px;
+          cursor: pointer;
+          opacity: 0.9;
+          z-index: 10000;
+        "
+      >
+        <canvas
+          width="80"
+          height="48"
+          style="width: 80px; height: 48px; display: block;"
+        ></canvas
+        ><canvas
+          width="80"
+          height="48"
+          style="width: 80px; height: 48px; display: none;"
+        ></canvas
+        ><canvas
+          width="80"
+          height="48"
+          style="width: 80px; height: 48px; display: none;"
+        ></canvas>
+      </div>
+    </div>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://threejs.org/build/three.module.js"
+        }
+      }
+    </script>
+  </body>
+
+  <script type="module">
+    // Three.js - Load .OBJ ?
+    // from https://threejs.org/manual/examples/load-obj-no-materials.html
+
+    import * as THREE from "three";
+    import { OrbitControls } from "https://unpkg.com/three@0.140.2/examples/jsm/controls/OrbitControls.js";
+    import { OBJLoader } from "https://unpkg.com/three@0.140.2/examples/jsm/loaders/OBJLoader.js";
+    // import { Stats } from "https://unpkg.com/three@0.140.2/examples/jsm/libs/stats.module.js";
+
+    let selectedModel = "models/magnolia.obj";
+    function main() {
+      const canvas = document.querySelector("#c");
+      const renderer = new THREE.WebGLRenderer({ canvas });
+      renderer.outputEncoding = THREE.sRGBEncoding;
+
+      // const container = document.getElementById("container");
+      // const stats = new Stats();
+      // container.appendChild(stats.dom);
+
+      const fov = 45;
+      const aspect = 2; // the canvas default
+      const near = 0.1;
+      const far = 1000;
+      const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+      camera.position.set(0, 10, 150);
+
+      const controls = new OrbitControls(camera, canvas);
+      controls.target.set(0, 5, 0);
+      controls.update();
+
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color("#000c59");
+
+      {
+        const planeSize = 40;
+
+        // const loader = new THREE.TextureLoader();
+        // const texture = loader.load(
+        //   "https://threejs.org/manual/examples/resources/images/checker.png"
+        // );
+        // texture.encoding = THREE.sRGBEncoding;
+        // texture.wrapS = THREE.RepeatWrapping;
+        // texture.wrapT = THREE.RepeatWrapping;
+        // texture.magFilter = THREE.NearestFilter;
+        // const repeats = planeSize / 2;
+        // texture.repeat.set(repeats, repeats);
+
+        // const planeGeo = new THREE.PlaneGeometry(planeSize, planeSize);
+        // const planeMat = new THREE.MeshPhongMaterial({
+        //   map: texture,
+        //   side: THREE.DoubleSide
+        // });
+        // const mesh = new THREE.Mesh(planeGeo, planeMat);
+        // mesh.rotation.x = Math.PI * -0.5;
+        // scene.add(mesh);
+      }
+
+      {
+        const skyColor = 0xb1e1ff; // light blue
+        const groundColor = 0xb97a20; // brownish orange
+        const intensity = 0.6;
+        const light = new THREE.HemisphereLight(
+          skyColor,
+          groundColor,
+          intensity
+        );
+        scene.add(light);
+      }
+
+      {
+        const color = 0xffffff;
+        const intensity = 0.8;
+        const light = new THREE.DirectionalLight(color, intensity);
+        light.position.set(0, 10, 0);
+        light.target.position.set(-5, 0, 0);
+        scene.add(light);
+        scene.add(light.target);
+      }
+
+      var selectedObject;
+      {
+        const objLoader = new OBJLoader();
+        objLoader.load(selectedModel, (root) => {
+          selectedObject = root;
+          scene.add(root);
+        });
+      }
+
+      var selectbox = document.querySelector("#selectbox");
+      console.log(selectbox);
+      var selected = document.getElementById("selectbox").value;
+      console.log(selected);
+      selectbox.addEventListener("change", function (event) {
+        scene.remove(selectedObject);
+        const objLoader = new OBJLoader();
+        objLoader.load(event.target.value, (root) => {
+          selectedObject = root;
+          scene.add(root);
+        });
+      });
+
+      function resizeRendererToDisplaySize(renderer) {
+        const canvas = renderer.domElement;
+        const width = canvas.clientWidth;
+        const height = canvas.clientHeight;
+        const needResize = canvas.width !== width || canvas.height !== height;
+        if (needResize) {
+          renderer.setSize(width, height, false);
+        }
+        return needResize;
+      }
+
+      function render() {
+        if (resizeRendererToDisplaySize(renderer)) {
+          const canvas = renderer.domElement;
+          camera.aspect = canvas.clientWidth / canvas.clientHeight;
+          camera.updateProjectionMatrix();
+        }
+
+        renderer.render(scene, camera);
+
+        requestAnimationFrame(render);
+      }
+
+      requestAnimationFrame(render);
+    }
+
+    main();
+  </script>
+</html>

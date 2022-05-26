@@ -1,2 +1,2 @@
-# three-select-obj
+# three-model
 Created with CodeSandbox
