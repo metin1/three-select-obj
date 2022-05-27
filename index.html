@@ -68,7 +68,8 @@
         ></canvas>
       </div>
     </div>
-    <script async src="https://unpkg.com/es-module-shims@1.3.6/dist/es-module-shims.js"></script>
+    <script async src="https://unpkg.com/es-module-shims@1.3.6/dist/es-module-shims.js"></script> -->
+<!--    <script async src="es-module-shims.js"></script> -->
     <script type="importmap">
       {
         "imports": {
@@ -78,14 +79,20 @@
     </script>
   </body>
 
+
   <script type="module">
     // Three.js - Load .OBJ ?
     // from https://threejs.org/manual/examples/load-obj-no-materials.html
 
     import * as THREE from 'three';
     import { OrbitControls } from "https://unpkg.com/three@0.140.2/examples/jsm/controls/OrbitControls.js";
+//    import { OrbitControls } from "./controls/OrbitControls.js";
     import { OBJLoader } from "https://unpkg.com/three@0.140.2/examples/jsm/loaders/OBJLoader.js";
-    // import { Stats } from "https://unpkg.com/three@0.140.2/examples/jsm/libs/stats.module.js";
+//    import { OBJLoader } from "./loaders/OBJLoader.js";
+    import { Stats } from "https://unpkg.com/three@0.140.2/examples/jsm/libs/stats.module.js";
+    import { XYZLoader } from "./XYZLoader.js"
+
+
 
     let selectedModel = "./models/shuttle.obj";
 
@@ -133,6 +140,13 @@
         scene.add(light);
         scene.add(light.target);
       }
+
+	let xyz = new XYZLoader();
+		xyz.load("model.xyz").then(() => {
+		console.log('loaded');
+		let mesh = xyz.createMesh();
+		scene.add(mesh);
+	})
 
       var selectedObject;
       {
