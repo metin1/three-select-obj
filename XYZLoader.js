@@ -276,16 +276,17 @@ class XYZLoader {
 
 		const geometry = new THREE.BufferGeometry();
 		let vertexAttribute = new THREE.InterleavedBuffer(this.vertexBuffer, 6);
+		let colorAttribute = new THREE.BufferAttribute(new Uint8Array(this.colorBuffer.buffer), 4, true);
 
 		geometry.setAttribute( 'position', new THREE.InterleavedBufferAttribute( vertexAttribute, 3, 0, false ) );
 		geometry.setAttribute( 'normal', new THREE.InterleavedBufferAttribute( vertexAttribute, 3, 3, true ) );
-
+		geometry.setAttribute( 'color', colorAttribute, 4);
 		geometry.setIndex( new THREE.BufferAttribute(this.indexBuffer, 1 ));
 
 		const material = new THREE.MeshPhongMaterial( {
 			side: THREE.DoubleSide,
 //to be added back with colors
-//			vertexColors: true
+			vertexColors: true
 		} );
 
 		let mesh = new THREE.Mesh( geometry, material );
@@ -293,7 +294,7 @@ class XYZLoader {
 	}
 
 	buildBuffers() {
-		let vertexByteSize = 0;
+		let vertexSize = 0;
 		let indexSize = 0;
 
 		for(let block of Object.values(this.blocks)) {
@@ -301,18 +302,20 @@ class XYZLoader {
 				continue;
 
 			for(let {format, id} of block.vertexBuffers)
-				vertexByteSize += this.buffers[id].uncompressedSize;
+				vertexSize += this.buffers[id].numElements;
 
 			for(let {format, id} of block.indexBuffers)
 				indexSize += this.buffers[id].numElements;
 		}
 
-		this.vertexBuffer = new Float32Array(vertexByteSize);
+		this.vertexBuffer = new Float32Array(vertexSize*6);
 		this.indexBuffer = new Uint32Array(indexSize);
+		this.colorBuffer = new Uint32Array(vertexSize);
 
 		let vertexCount = 0;
 		let vertexOffset = 0;
 		let indexCount = 0;
+		let geometryId = 0;
 		for(let block of Object.values(this.blocks)) {
 			if(block.type != BlockTypes.GEOMETRY) 
 				continue;
@@ -328,9 +331,13 @@ class XYZLoader {
 			for(let {format, id} of block.vertexBuffers) {
 				let buffer = this.buffers[id];
 				this.vertexBuffer.set(buffer.buffer, vertexOffset, buffer.numElements*6);
+				for(let i = 0; i < buffer.numElements; i++)
+					this.colorBuffer[i+vertexOffset/6] = geometryId;
+
 				vertexOffset += buffer.numElements*6;
 				vertexCount += buffer.numElements;
 			}
+			geometryId++;
 		}
 	}
 };
