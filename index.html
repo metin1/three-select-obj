@@ -89,7 +89,7 @@
 //    import { OrbitControls } from "./controls/OrbitControls.js";
     import { OBJLoader } from "https://unpkg.com/three@0.140.2/examples/jsm/loaders/OBJLoader.js";
 //    import { OBJLoader } from "./loaders/OBJLoader.js";
-    import { Stats } from "https://unpkg.com/three@0.140.2/examples/jsm/libs/stats.module.js";
+    // import { Stats } from "https://unpkg.com/three@0.140.2/examples/jsm/libs/stats.module.js";
     import { XYZLoader } from "./XYZLoader.js"
 
 
@@ -141,22 +141,22 @@
         scene.add(light.target);
       }
 
-	let xyz = new XYZLoader();
-		xyz.load("model.xyz").then(() => {
-		console.log('loaded');
-		let mesh = xyz.createMesh();
-		scene.add(mesh);
-	})
+      let xyz = new XYZLoader();
+        xyz.load("./models/model.xyz").then(() => {
+        console.log('loaded');
+        let mesh = xyz.createMesh();
+        scene.add(mesh);
+      })
 
-      var selectedObject;
-      {
-        const objLoader = new OBJLoader();
-        objLoader.crossOrigin = 'anonymous';
-        objLoader.load(selectedModel, (root) => {
-          selectedObject = root;
-          scene.add(root);
-        });
-      }
+      // var selectedObject;
+      // {
+      //   const objLoader = new OBJLoader();
+      //   objLoader.crossOrigin = 'anonymous';
+      //   objLoader.load(selectedModel, (root) => {
+      //     selectedObject = root;
+      //     scene.add(root);
+      //   });
+      // }
 
       var selectbox = document.querySelector("#selectbox");
       console.log(selectbox);
