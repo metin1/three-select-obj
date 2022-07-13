@@ -22,74 +22,6 @@
         top: 10px;
         left: 10px;
       }
-      .cube__container {
-        width: 120px;
-        height: 120px;
-        margin: 10px;
-        perspective: 400px;
-        position: absolute;
-        right: 40px;
-        bottom: 20px;
-        z-index: 2;
-      }
-      .cube {
-          width: 100px;
-          height: 100px;
-          position: relative;
-          transform-style: preserve-3d;
-          transform: translateZ(-300px);
-          text-transform: uppercase;
-        }
-
-        .cube__face {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          position: absolute;
-          width: 120px;
-          height: 120px;
-          border: 2px solid #7d7d7d;
-          line-height: 100px;
-          font-size: 25px;
-          font-weight: bold;
-          color: #7d7d7d;
-          text-align: center;
-          background: #ddd;
-          transition: all 0.2s;
-          cursor: pointer;
-          user-select: none;
-
-
-        }
-
-        .cube__face:hover {
-            background: #7d7d7d;
-            color: #fff;
-          }
-
-        .cube__face--front {
-          transform: rotateX(270deg) translateZ(-60px);
-        }
-
-        .cube__face--right {
-          transform: rotateY(90deg) rotateX(180deg) rotateZ(270deg) translateZ(-60px);
-        }
-
-        .cube__face--back {
-          transform: rotateY(180deg) rotateX(90deg) translateZ(-60px);
-        }
-
-        .cube__face--left {
-          transform: rotateY(-90deg) rotateX(180deg) rotateZ(90deg) translateZ(-60px);
-        }
-
-        .cube__face--top {
-          transform: rotateX(180deg) translateZ(-60px);
-        }
-
-        .cube__face--bottom {
-          transform: translateZ(-60px);
-        }
     </style>
   </head>
   <body>
@@ -113,49 +45,9 @@
         ><canvas width="80" height="48" style="width: 80px; height: 48px; display: none"></canvas
         ><canvas width="80" height="48" style="width: 80px; height: 48px; display: none"></canvas>
       </div>
-      <div class="cube__container">
-        <div class='cube'>
-          <div
-            id="cube_front"
-            class='cube__face cube__face--front'
-          >
-            Front
-          </div>
-          <div
-            id="cube_back"
-            class='cube__face cube__face--back'
-          >
-            Back
-          </div>
-          <div
-            id="cube_right"
-            class='cube__face cube__face--right'
-          >
-            Right
-          </div>
-          <div
-            id="cube_left"
-            class='cube__face cube__face--left'
-          >
-            Left
-          </div>
-          <div
-            id="cube_top"
-            class='cube__face cube__face--top'
-          >
-            Top
-          </div>
-          <div
-            id="cube_bottom"
-            class='cube__face cube__face--bottom'
-          >
-            Bottom
-          </div>
-        </div>
-      </div>
     </div>
     <script async src="https://unpkg.com/es-module-shims@1.3.6/dist/es-module-shims.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js" integrity="sha512-lIKG1kC5TMb1Zx32vdz1n31YJMZRknVY20U9MJ28hD3y2c0OKN0Ce5NhJji78v8zX5UOSsm+MTBOcJt7yMBnSg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    -->
     <script type="importmap">
       {
         "imports": {
@@ -171,6 +63,7 @@
     import { OBJLoader } from 'https://unpkg.com/three@0.140.2/examples/jsm/loaders/OBJLoader.js'
     // import { Stats } from "https://unpkg.com/three@0.140.2/examples/jsm/libs/stats.module.js";
     import { XYZLoader } from './XYZLoader.js'
+    import ViewCube, { Orientation } from './ViewCube/ViewCube';
 
     let issueList = [
       { x: -8.819390801448783, y: 6.737682137188976, z: -0.7231083615150153 },
@@ -181,89 +74,9 @@
     let cameraPosition = { x: -10.695922402515466, y: 14.91391515339177, z: -19.727731098205517 }
     let selectedModel = './models/shuttle.obj'
 
-
-    const TOP = {
-      offsetFactor: {
-        x: 0,
-        y: 0,
-        z: 1,
-      },
-      axisAngle: {
-        x: 0,
-        y: 0,
-        z: 0,
-      },
-    };
-
-    const BOTTOM = {
-      offsetFactor: {
-        x: 0,
-        y: 0,
-        z: -1,
-      },
-      axisAngle: {
-        x: Math.PI,
-        y: 0,
-        z: 0,
-      },
-    };
-
-    const FRONT = {
-      offsetFactor: {
-        x: 0,
-        y: -1,
-        z: 0,
-      },
-      axisAngle: {
-        x: Math.PI / 2,
-        y: 0,
-        z: 0,
-      },
-    };
-
-    const BACK = {
-      offsetFactor: {
-        x: 0,
-        y: 1,
-        z: 0,
-      },
-      axisAngle: {
-        x: -(Math.PI / 2),
-        y: 0,
-        z: Math.PI,
-      },
-    };
-
-    const LEFT = {
-      offsetFactor: {
-        x: -1,
-        y: 0,
-        z: 0,
-      },
-      axisAngle: {
-        x: Math.PI / 2,
-        y: -(Math.PI / 2),
-        z: 0,
-      },
-    };
-
-    const RIGHT = {
-      offsetFactor: {
-        x: 1,
-        y: 0,
-        z: 0,
-      },
-      axisAngle: {
-        x: Math.PI / 2,
-        y: Math.PI / 2,
-        z: 0,
-      },
-    };
-
     function main() {
       const canvas = document.querySelector('#c')
-      const renderer = new THREE.WebGLRenderer({ canvas, premultipliedAlpha : false })
-      // var renderer = new THREE.WebGLRenderer( { premultipliedAlpha : false } );
+      const renderer = new THREE.WebGLRenderer({ canvas })
       renderer.outputEncoding = THREE.sRGBEncoding
 
       const fov = 45
@@ -345,22 +158,27 @@
         )
       }
 
-      // var selectbox = document.querySelector('#selectbox')
-      // console.log(selectbox)
+      // setTimeout(
+      //   log_positions(),
+      //   50, // after about 10ms, the problem occurs
+      // );
 
-      // var selected = document.getElementById('selectbox').value
-      // console.log(selected)
+      var selectbox = document.querySelector('#selectbox')
+      console.log(selectbox)
 
-      // selectbox.addEventListener('change', function (event) {
-      //   scene.remove(selectedObject)
-      //   const objLoader = new OBJLoader()
-      //   objLoader.crossOrigin = 'anonymous'
+      var selected = document.getElementById('selectbox').value
+      console.log(selected)
 
-      //   objLoader.load(event.target.value, (root) => {
-      //     selectedObject = root
-      //     scene.add(root)
-      //   })
-      // })
+      selectbox.addEventListener('change', function (event) {
+        scene.remove(selectedObject)
+        const objLoader = new OBJLoader()
+        objLoader.crossOrigin = 'anonymous'
+
+        objLoader.load(event.target.value, (root) => {
+          selectedObject = root
+          scene.add(root)
+        })
+      })
 
       document.addEventListener('click', onMouseClick)
 
@@ -385,13 +203,11 @@
         console.log(`LL: onMouseClick -> mouse`, mouse)
 
         mouseX = ( event.clientX - windowHalfX );
-        mouseY = ( event.clientY - windowHalfY );
+				mouseY = ( event.clientY - windowHalfY );
         const read = new Float32Array( 4 );
-        // renderer.readRenderTargetPixels( XYZMesh, windowHalfX + mouseX, windowHalfY - mouseY, 1, 1, read );
-        renderer.readPixels(mouseX, mouseY, 2, 2, gl.RGBA, gl.UNSIGNED_BYTE, read)
+				renderer.readRenderTargetPixels( XYZMesh, windowHalfX + mouseX, windowHalfY - mouseY, 1, 1, read );
 
         console.log('r:' + read[ 0 ] + '<br/>g:' + read[ 1 ] + '<br/>b:' + read[ 2 ])
-
         raycaster.setFromCamera(mouse, camera)
         var intersections = raycaster.intersectObjects([XYZMesh], true)
         console.log(`LL: onMouseClick -> intersections`, intersections)
@@ -411,7 +227,6 @@
         console.log(`LL: onMouseClick -> selectedColor`, selectedColor)
 
         const geometry = XYZMesh.geometry;
-        // readPixels(mouseX, mouseY, 2, 2, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
         const positionAttribute = geometry.getAttribute( 'position' );
         const partAttribute = geometry.getAttribute( 'part' );
         const colorAttribute = geometry.getAttribute( 'color' );
@@ -428,7 +243,7 @@
         console.log(`LL: onMouseClick -> object.localToWorld( vertex )`, XYZMesh.localToWorld( vertex ))
 
         XYZMesh.geometry.attributes.color.array = XYZMesh.geometry.attributes.color.array?.map(item => item === 1 ? item+10:item); //???
-       XYZMesh.geometry.attributes.color.needsUpdate = true;
+	      XYZMesh.geometry.attributes.color.needsUpdate = true;
         // console.log(`LL: onMouseClick -> selectedColor`, selectedColor)
         // console.log(`LL: onMouseClick -> intersects`, XYZMesh.geometry.attributes.color)
         console.log(`LL: onMouseClick -> intersects`, intersections[0].geometry.getAttribute('color'))
@@ -453,97 +268,40 @@
         return needResize
       }
 
-      document.getElementById("cube_top").addEventListener("click", function() { tweenCamera(TOP) });
-      document.getElementById("cube_left").addEventListener("click", function() { tweenCamera(LEFT) });
-      document.getElementById("cube_right").addEventListener("click", function() { tweenCamera(RIGHT) });
-      document.getElementById("cube_bottom").addEventListener("click", function() { tweenCamera(BOTTOM) });
-      document.getElementById("cube_back").addEventListener("click", function() { tweenCamera(BACK) });
-      document.getElementById("cube_front").addEventListener("click", function() { tweenCamera(FRONT) });
-
-      function tweenCamera (orientation) {
+      const tweenCamera = (orientation) => {
         const { offsetFactor, axisAngle } = orientation;
 
-        const offsetUnit = camera.position.length();
-        const offset = new THREE.Vector3(
-          offsetUnit * offsetFactor.x,
-          offsetUnit * offsetFactor.y,
-          offsetUnit * offsetFactor.z
-        );
+          const offsetUnit = cameraRef.current.position.length();
+          const offset = new THREE.Vector3(
+            offsetUnit * offsetFactor.x,
+            offsetUnit * offsetFactor.y,
+            offsetUnit * offsetFactor.z
+          );
 
-        const center = new THREE.Vector3();
-        const finishPosition = center.add(offset);
+          const center = new THREE.Vector3();
+          const finishPosition = center.add(offset);
 
-        const positionTween = new TWEEN.Tween(camera.position)
-          .to(finishPosition, 300)
-          .easing(TWEEN.Easing.Circular.Out);
+          const positionTween = new TWEEN.Tween(cameraRef.current.position)
+            .to(finishPosition, 300)
+            .easing(TWEEN.Easing.Circular.Out);
 
-        const euler = new THREE.Euler(axisAngle.x, axisAngle.y, axisAngle.z);
+          const euler = new THREE.Euler(axisAngle.x, axisAngle.y, axisAngle.z);
 
-        // rotate camera too!
-        const finishQuaternion = new THREE.Quaternion()
-          .copy(camera.quaternion)
-          .setFromEuler(euler);
+          // rotate camera too!
+          const finishQuaternion = new THREE.Quaternion()
+            .copy(cameraRef.current.quaternion)
+            .setFromEuler(euler);
 
-        const quaternionTween = new TWEEN.Tween(camera.quaternion)
-          .to(finishQuaternion, 300)
-          .easing(TWEEN.Easing.Circular.Out);
+          const quaternionTween = new TWEEN.Tween(cameraRef.current.quaternion)
+            .to(finishQuaternion, 300)
+            .easing(TWEEN.Easing.Circular.Out);
 
-        positionTween.start();
-        quaternionTween.start();
-      }
-
-      function epsilon(value) {
-        return Math.abs(value) < 1e-10 ? 0 : value;
-      }
-
-      function getCameraCSSMatrix(matrix) {
-        const { elements } = matrix;
-
-        return `matrix3d(
-          ${epsilon(elements[0])},
-          ${epsilon(-elements[1])},
-          ${epsilon(elements[2])},
-          ${epsilon(elements[3])},
-          ${epsilon(elements[4])},
-          ${epsilon(-elements[5])},
-          ${epsilon(elements[6])},
-          ${epsilon(elements[7])},
-          ${epsilon(elements[8])},
-          ${epsilon(-elements[9])},
-          ${epsilon(elements[10])},
-          ${epsilon(elements[11])},
-          ${epsilon(elements[12])},
-          ${epsilon(-elements[13])},
-          ${epsilon(elements[14])},
-          ${epsilon(elements[15])})`;
-      }
-
-      const mat = new THREE.Matrix4();
-
-
-      // // resize handler
-      // const onResize = () => {
-      //   renderer.setSize(window.innerWidth, window.innerHeight);
-      //   camera.left = -window.innerWidth / 2;
-      //   camera.right = window.innerWidth / 2;
-      //   camera.top = window.innerHeight / 2;
-      //   camera.bottom = -window.innerHeight / 2;
-      //   camera.updateProjectionMatrix();
-      // };
-      // window.addEventListener('resize', onResize)
+          positionTween.start();
+          quaternionTween.start();
+        }
+      };
 
       function render() {
-        const cube = document.querySelector('.cube');
-
-        if (cube) {
-          mat.extractRotation(camera.matrixWorldInverse);
-          cube.style.transform = `translateZ(-300px) ${getCameraCSSMatrix(
-            mat
-          )}`;
-        }
-
-        TWEEN.update()
-
         if (resizeRendererToDisplaySize(renderer)) {
           const canvas = renderer.domElement
           camera.aspect = canvas.clientWidth / canvas.clientHeight
@@ -559,6 +317,5 @@
     }
 
     main()
-
   </script>
 </html>

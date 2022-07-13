@@ -10,5 +10,8 @@
   "license": "MIT",
   "devDependencies": {
     "serve": "^11.2.0"
+  },
+  "dependencies": {
+    "styled-components": "^5.3.5"
   }
 }

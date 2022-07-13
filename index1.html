@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <title>Three.js</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        position: relative;
+      }
+      #c {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+
+      .select {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <div class="select">
+        <select id="selectbox">
+          <option value="./models/cube.obj">Cube</option>
+          <option value="./models/monkey.obj">Monkey</option>
+          <option value="./models/dolphin.obj">Dolphin</option>
+          <option value="./models/shuttle.obj" selected>Shuttle</option>
+          <option value="./models/magnolia.obj">Magnolia</option>
+          <option value="./models/minicooper.obj">Minicooper</option>
+        </select>
+        <span class="focus"></span>
+      </div>
+      <canvas id="c"></canvas>
+      <div
+        style="position: fixed; top: 0px; left: 0px; cursor: pointer; opacity: 0.9; z-index: 10000"
+      >
+        <canvas width="80" height="48" style="width: 80px; height: 48px; display: block"></canvas
+        ><canvas width="80" height="48" style="width: 80px; height: 48px; display: none"></canvas
+        ><canvas width="80" height="48" style="width: 80px; height: 48px; display: none"></canvas>
+      </div>
+    </div>
+    <script async src="https://unpkg.com/es-module-shims@1.3.6/dist/es-module-shims.js"></script>
+    -->
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.140.2/build/three.module.js"
+        }
+      }
+    </script>
+  </body>
+
+  <script type="module">
+    import * as THREE from 'three'
+    import { OrbitControls } from 'https://unpkg.com/three@0.140.2/examples/jsm/controls/OrbitControls.js'
+    import { OBJLoader } from 'https://unpkg.com/three@0.140.2/examples/jsm/loaders/OBJLoader.js'
+    // import { Stats } from "https://unpkg.com/three@0.140.2/examples/jsm/libs/stats.module.js";
+    import { XYZLoader } from './XYZLoader.js'
+
+    let issueList = [
+      { x: -8.819390801448783, y: 6.737682137188976, z: -0.7231083615150153 },
+      { x: -18.83384543251512, y: 6.732996053789963, z: 1.9809157571448637 },
+      { x: -13.346123226182158, y: 7.118660932447762, z: -9.582096294998161 },
+    ]
+
+    let cameraPosition = { x: -10.695922402515466, y: 14.91391515339177, z: -19.727731098205517 }
+    let selectedModel = './models/shuttle.obj'
+
+    function main() {
+      const canvas = document.querySelector('#c')
+      const renderer = new THREE.WebGLRenderer({ canvas })
+      renderer.outputEncoding = THREE.sRGBEncoding
+
+      const fov = 45
+      const aspect = 2
+      const near = 0.1
+      const far = 1000
+      const camera = new THREE.PerspectiveCamera(fov, aspect, near, far)
+      camera.position.set(-19.208012124225984, 11.888007259993246, -16.633302411721328)
+
+      const controls = new OrbitControls(camera, canvas)
+      controls.target.set(0, 5, 0)
+      controls.update()
+
+      const scene = new THREE.Scene()
+      scene.background = new THREE.Color('#000c59')
+
+      {
+        const planeSize = 40
+      }
+
+      {
+        const skyColor = 0xb1e1ff
+        const groundColor = 0xb97a20
+        const intensity = 0.6
+        const light = new THREE.HemisphereLight(skyColor, groundColor, intensity)
+        scene.add(light)
+      }
+
+      {
+        const color = 0xffffff
+        const intensity = 0.8
+        const light = new THREE.DirectionalLight(color, intensity)
+        light.position.set(0, 10, 0)
+        light.target.position.set(-5, 0, 0)
+        scene.add(light)
+        scene.add(light.target)
+      }
+
+      let XYZMesh
+      let xyz = new XYZLoader()
+      xyz.load('./models/model.xyz').then(() => {
+        console.log('loaded')
+        XYZMesh = xyz.createMesh()
+        scene.add(XYZMesh)
+      })
+
+      let geometry = new THREE.SphereGeometry(0.1, 16, 8)
+      let material = new THREE.MeshPhongMaterial({
+        color: 'Yellow',
+        shininess: 150,
+        specular: 0x111111,
+      })
+
+      const issues = []
+      for (let [i, issuePosition] of issueList.entries()) {
+        issues[i] = new THREE.Mesh(geometry, material)
+        issues[i].position.set(issuePosition.x, issuePosition.y, issuePosition.z)
+        scene.add(issues[i])
+      }
+
+      function log_positions() {
+        console.log(
+          'object.position: ' +
+            XYZMesh.position.x +
+            ', ' +
+            XYZMesh.position.y +
+            ', ' +
+            XYZMesh.position.z
+        )
+        console.log(
+          'camera.position: ' +
+            camera.position.x +
+            ', ' +
+            camera.position.y +
+            ', ' +
+            camera.position.z
+        )
+      }
+
+      // setTimeout(
+      //   log_positions(),
+      //   50, // after about 10ms, the problem occurs
+      // );
+
+      var selectbox = document.querySelector('#selectbox')
+      console.log(selectbox)
+
+      var selected = document.getElementById('selectbox').value
+      console.log(selected)
+
+      selectbox.addEventListener('change', function (event) {
+        scene.remove(selectedObject)
+        const objLoader = new OBJLoader()
+        objLoader.crossOrigin = 'anonymous'
+
+        objLoader.load(event.target.value, (root) => {
+          selectedObject = root
+          scene.add(root)
+        })
+      })
+
+      document.addEventListener('click', onMouseClick)
+
+      // let mouseX = 0, mouseY = 0;
+
+      // const windowHalfX = window.innerWidth / 2;
+      // const windowHalfY = window.innerHeight / 2;
+
+      var mouse = new THREE.Vector2()
+      var raycaster = new THREE.Raycaster()
+      let selectedColor
+      function onMouseClick(event) {
+        log_positions()
+        console.log(`LL: onMouseClick -> event`, event)
+        event.preventDefault()
+
+        mouse.x = (event.clientX / renderer.domElement.clientWidth) * 2 - 1
+        mouse.y = -(event.clientY / renderer.domElement.clientHeight) * 2 + 1
+        console.log(`LL: onMouseClick -> mouse`, mouse)
+
+        // mouseX = ( event.clientX - windowHalfX );
+				// mouseY = ( event.clientY - windowHalfY );
+        // const read = new Float32Array( 4 );k
+				// renderer.readRenderTargetPixels( XYZMesh, windowHalfX + mouseX, windowHalfY - mouseY, 1, 1, read );
+
+        // console.log('r:' + read[ 0 ] + '<br/>g:' + read[ 1 ] + '<br/>b:' + read[ 2 ])
+        raycaster.setFromCamera(mouse, camera)
+        var intersections = raycaster.intersectObjects([XYZMesh], true)
+        console.log(`LL: onMouseClick -> intersections`, intersections)
+        console.log(
+          `LL: onMouseClick ->   intersections[0].object.material.color`,
+          intersections[0].object.material.color
+        )
+
+        console.log(
+          `LL: onMouseClick ->   intersections[0].object.geometry.color`,
+          intersections[0].object.geometry.attributes.color
+        )
+        if (selectedColor) {
+          intersections[0].object.geometry.attributes.color = selectedColor
+        }
+        selectedColor = intersections[0].object.geometry.attributes.color
+        console.log(`LL: onMouseClick -> selectedColor`, selectedColor)
+
+        XYZMesh.geometry.attributes.color.array = XYZMesh.geometry.attributes.color.array?.map(item => item === 1 ? item+10:item); //???
+	      XYZMesh.geometry.attributes.color.needsUpdate = true;
+        // console.log(`LL: onMouseClick -> selectedColor`, selectedColor)
+        // console.log(`LL: onMouseClick -> intersects`, XYZMesh.geometry.attributes.color)
+        console.log(`LL: onMouseClick -> intersects`, intersections[0].geometry.getAttribute('color'))
+        console.log(`LL: onMouseClick -> XYZMesh.geometry.attributes.color.array`, XYZMesh.geometry.attributes.color.array?.map(item => item === 0 ? 255:0))
+        // if (intersections.length > 0) {
+        //   const point = new THREE.Mesh(geometry, material)
+        //   console.log(`LL: onMouseClick -> point`, point)
+        //   point.position.set(intersections[0].point.x, intersections[0].point.y, intersections[0].point.z)
+        //   scene.add(point)
+        //   console.log(point.position)
+        // }
+      }
+
+      function resizeRendererToDisplaySize(renderer) {
+        const canvas = renderer.domElement
+        const width = canvas.clientWidth
+        const height = canvas.clientHeight
+        const needResize = canvas.width !== width || canvas.height !== height
+        if (needResize) {
+          renderer.setSize(width, height, false)
+        }
+        return needResize
+      }
+
+      function render() {
+        if (resizeRendererToDisplaySize(renderer)) {
+          const canvas = renderer.domElement
+          camera.aspect = canvas.clientWidth / canvas.clientHeight
+          camera.updateProjectionMatrix()
+        }
+
+        renderer.render(scene, camera)
+
+        requestAnimationFrame(render)
+      }
+
+      requestAnimationFrame(render)
+    }
+
+    main()
+  </script>
+</html>
